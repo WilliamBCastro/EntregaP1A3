@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App de Delivery</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      transition: all 0.3s ease;
+    }
+
+    /* Versão Desktop */
+    body.desktop {
+      font-size: 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Versão Smartphone */
+    body.smartphone {
+      font-size: 14px;
+      background-color: #f0f0f0;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: white;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 2px solid #ddd;
+    }
+
+    header img {
+      max-height: 80px;
+      vertical-align: middle;
+    }
+
+    header h1 {
+      display: inline-block;
+      margin: 0 0 0 15px;
+      vertical-align: middle;
+      font-family: "Bookman Old Style", serif;
+      font-size: 65px;
+      font-weight: bold;
+      font-style: italic;
+      color: #D32F2F;
+    }
+
+    .screen {
+      padding: 20px;
+      text-align: center;
+      display: none;
+    }
+
+    .active {
+      display: block;
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 10px 0;
+      width: 80%;
+      max-width: 300px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      background-color: #D32F2F;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .restaurant, .cart-item {
+      border: 1px solid #ccc;
+      margin: 10px auto;
+      padding: 10px;
+      max-width: 320px;
+      background: white;
+    }
+
+    .restaurant button, .cart-item button {
+      width: auto;
+    }
+
+    .cart-total {
+      font-weight: bold;
+    }
+
+    .toggle-button {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      background-color: #D32F2F;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      border-radius: 6px;
+      z-index: 100;
+    }
+
+  </style>
+</head>
+<body class="desktop">
+  <header>
+    <img src="https://i.ibb.co/HpqLzgkv/Logo-1.jpg" alt="Logotipo da Empresa">
+    <h1>Quick Launch</h1>
+  </header>
+
+  <!-- Login Screen -->
+  <div id="login" class="screen active">
+    <h2>Entrar</h2>
+    <input type="email" placeholder="E-mail" id="loginEmail">
+    <input type="password" placeholder="Senha" id="loginSenha">
+    <button onclick="showScreen('home')">Entrar</button>
+  </div>
+
+  <!-- Cadastro Screen -->
+  <div id="signup" class="screen">
+    <h2>Cadastrar</h2>
+    <input type="text" placeholder="Nome">
+    <input type="email" placeholder="E-mail">
+    <button onclick="showScreen('login')">Cadastrar</button>
+  </div>
+
+  <!-- Home / Restaurantes -->
+  <div id="home" class="screen">
+    <h2>Restaurantes</h2>
+    <div class="restaurant">
+      <h3>Pizza do Zé</h3>
+      <p>Pizza Margherita - R$39,90</p>
+      <button onclick="addToCart('Pizza do Zé', 'Pizza Margherita', 39.90)">Adicionar ao Carrinho</button>
+    </div>
+    <div class="restaurant">
+      <h3>Hamburgueria 24h</h3>
+      <p>X-Burguer - R$29,90</p>
+      <button onclick="addToCart('Hamburgueria 24h', 'X-Burguer', 29.90)">Adicionar ao Carrinho</button>
+    </div>
+    <div class="restaurant">
+      <h3>Sushi House</h3>
+      <p>Combo Sushi - R$49,90</p>
+      <button onclick="addToCart('Sushi House', 'Combo Sushi', 49.90)">Adicionar ao Carrinho</button>
+    </div>
+    <button onclick="showScreen('cart')">Ver Carrinho</button>
+  </div>
+
+  <!-- Carrinho -->
+  <div id="cart" class="screen">
+    <h2>Carrinho</h2>
+    <div id="cartItems"></div>
+    <p class="cart-total" id="total"></p>
+    <button onclick="checkout()">Finalizar Pedido</button>
+    <button onclick="showScreen('home')">Voltar</button>
+  </div>
+
+  <!-- Confirmação -->
+  <div id="confirmation" class="screen">
+    <h2>Seu pedido foi realizado!</h2>
+    <p>Obrigado pela preferência.</p>
+    <button onclick="resetApp()">Voltar para o Início</button>
+  </div>
+
+  <script>
+    let cart = [];
+
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      if (id === 'cart') updateCartView();
+    }
+
+    function addToCart(restaurant, item, price) {
+      cart.push({ restaurant, item, price });
+      alert(item + ' adicionado ao carrinho!');
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      updateCartView();
+    }
+
+    function updateCartView() {
+      const cartContainer = document.getElementById('cartItems');
+      cartContainer.innerHTML = '';
+      let total = 0;
+      cart.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `
+          <p>${item.item} - R$${item.price.toFixed(2)}</p>
+          <button onclick="removeFromCart(${index})">Remover</button>
+        `;
+        cartContainer.appendChild(div);
+        total += item.price;
+      });
+      document.getElementById('total').innerText = 'Total: R$' + total.toFixed(2);
+    }
+
+    function checkout() {
+      if (cart.length === 0) return alert('Carrinho vazio!');
+      const pedidoId = Math.floor(Math.random() * 100000);
+      const restaurante = cart[0].restaurant;
+      const items = cart.map(c => `- ${c.item}: R$${c.price.toFixed(2)}`).join('\n');
+      const total = cart.reduce((sum, c) => sum + c.price, 0).toFixed(2);
+      const txt = `Pedido #${pedidoId}\nRestaurante: ${restaurante}\nItens:\n${items}\nTotal: R$${total}\nPagamento: Online`;
+
+      const blob = new Blob([txt], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `pedido_${pedidoId}.txt`;
+      a.click();
+
+      showScreen('confirmation');
+    }
+
+    function resetApp() {
+      cart = [];
+      showScreen('home');
+    }
+
+    function toggleView() {
+      const currentView = document.body.classList.contains('desktop') ? 'desktop' : 'smartphone';
+      if (currentView === 'desktop') {
+        document.body.classList.remove('desktop');
+        document.body.classList.add('smartphone');
+      } else {
+        document.body.classList.remove('smartphone');
+        document.body.classList.add('desktop');
+      }
+    }
+  </script>
+
+  <!-- Botão para alternar entre as versões -->
+  <button class="toggle-button" onclick="toggleView()">Alternar entre Desktop e Smartphone</button>
+
+</body>
+</html>
